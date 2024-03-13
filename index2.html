@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Excel Hyperlinks</title>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept=".xlsx">
+<div id="hyperlinksContainer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+<script>
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+
+        var sheet = workbook.Sheets['Sheet1'];
+
+        var hyperlinksContainer = document.getElementById('hyperlinksContainer');
+        hyperlinksContainer.innerHTML = '';
+
+        // Extract and display the hyperlinks
+        var hyperlinksOpened = 0; // Variable to keep track of the number of hyperlinks opened
+for (var rowIndex = 1; rowIndex <= 100; rowIndex++) {
+    var cellAddress = 'A' + rowIndex; // Assuming hyperlinks are in column A
+    var cell = sheet[cellAddress];
+    if (cell && cell.l && cell.l.Target) {
+        var hyperlink = cell.l.Target;
+        console.log('Opening hyperlink:', hyperlink);
+        window.open(hyperlink, '_blank');
+        hyperlinksOpened++;
+
+        // If we have opened 10 hyperlinks, break out of the loop
+        if (hyperlinksOpened >= 10) {
+            break;
+        }
+    }
+}
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+</script>
+
+</body>
+</html>
